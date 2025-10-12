@@ -45,7 +45,7 @@ export function NavUser({
     image: string
   }
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
   const router = useRouter();
 
@@ -58,7 +58,7 @@ export function NavUser({
       }
     });
     router.push("/");
-}
+  }
 
   return (
     <SidebarMenu>

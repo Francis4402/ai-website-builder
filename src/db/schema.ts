@@ -1,4 +1,4 @@
-import { boolean, integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, integer, json, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum('user_role', ['User', 'Admin']);
 
@@ -62,6 +62,27 @@ export const verification = pgTable("verification", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+});
+
+export const projectTable = pgTable("projects", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id").unique(),
+  createdBy: text("created_by").references(() => user.email),
+  createdOn: timestamp().defaultNow(),
+});
+
+export const frameTable = pgTable("frames", {
+  id: text("id").primaryKey(),
+  frameId: text("frame_id"),
+  projectId: text("project_id").unique().references(() => projectTable.id),
+  createdOn: timestamp().defaultNow(),
+});
+
+export const chatTable = pgTable("chats", {
+  id: text("id").primaryKey(),
+  chatMessage: json("chat_message"),
+  createdBy: text("created_by").references(() => user.email),
+  createdOn: timestamp().defaultNow(),
 });
 
 

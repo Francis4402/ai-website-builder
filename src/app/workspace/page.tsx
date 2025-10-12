@@ -1,8 +1,11 @@
-import React from 'react'
+
+import Hero from '../_components/Hero'
 
 const WorkSpace = () => {
   return (
-    <div>WorkSpace</div>
+    <div>
+      <Hero/>
+    </div>
   )
 }
 

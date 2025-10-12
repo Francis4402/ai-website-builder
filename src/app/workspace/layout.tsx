@@ -12,7 +12,7 @@ const WorkSpaceLayout = async ({children}: {children: React.ReactNode}) => {
     <SidebarProvider>
         <AppSidebar session={session} />
         <div className='w-full'>
-            <AppHeader />
+            <AppHeader session={session} />
             {children}
         </div>
     </SidebarProvider>
