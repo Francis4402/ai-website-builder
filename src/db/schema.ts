@@ -73,7 +73,8 @@ export const projectTable = pgTable("projects", {
 
 export const frameTable = pgTable("frames", {
   id: text("id").primaryKey(),
-  frameId: text("frame_id"),
+  frameId: text("frame_id").unique(),
+  designCode: text("design_code"),
   projectId: text("project_id").unique().references(() => projectTable.id),
   createdOn: timestamp().defaultNow(),
 });
@@ -81,6 +82,7 @@ export const frameTable = pgTable("frames", {
 export const chatTable = pgTable("chats", {
   id: text("id").primaryKey(),
   chatMessage: json("chat_message"),
+  frameId: text("frame_id").references(() => frameTable.id),
   createdBy: text("created_by").references(() => user.email),
   createdOn: timestamp().defaultNow(),
 });
