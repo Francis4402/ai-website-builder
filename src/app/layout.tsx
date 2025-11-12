@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { ToastHandler } from "./_components/ToastHandler";
+
 
 
 // const geistSans = Geist({
@@ -36,7 +36,6 @@ export default function RootLayout({
         className={`${outfit.className} antialiased`}
       >
         <Toaster position="top-right" />
-        <ToastHandler />
         {children}
       </body>
     </html>

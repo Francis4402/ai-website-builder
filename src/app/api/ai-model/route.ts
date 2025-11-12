@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
-        model: "meituan/longcat-flash",
+        model: "nvidia/nemotron-nano-9b-v2:free",
         messages,
         stream: true,
       },
@@ -25,35 +25,60 @@ export async function POST(req: NextRequest) {
 
     const stream = response.data;
     const encoder = new TextEncoder();
+    let closed = false;
+
+    let buffer = "";
 
     const readable = new ReadableStream({
-      async start(controller) {
+      start(controller) {
         stream.on("data", (chunk: Buffer) => {
-          const payloads = chunk.toString().split("\n\n");
+          buffer += chunk.toString();
+
+          // Split by double newlines separating events
+          const payloads = buffer.split("\n\n");
+          buffer = payloads.pop() || "";
 
           for (const payload of payloads) {
+            if (!payload.trim()) continue;
+
             if (payload.includes("[DONE]")) {
-              controller.close();
+              if (!closed) {
+                closed = true;
+                controller.close();
+              }
               return;
             }
 
             if (payload.startsWith("data:")) {
+              const jsonStr = payload.slice(5).trim();
               try {
-                const data = JSON.parse(payload.slice(5).trim());
+                const data = JSON.parse(jsonStr);
                 const text = data.choices?.[0]?.delta?.content;
                 if (text) controller.enqueue(encoder.encode(text));
               } catch (err) {
-                console.error("Error parsing stream chunk", err);
+                // Don’t crash on partial JSON — keep buffer for next chunk
+                console.warn("⚠️ Skipping incomplete JSON chunk:", jsonStr);
               }
             }
           }
         });
 
-        stream.on("end", () => controller.close());
-        stream.on("error", (err: any) => {
-          console.error("Stream error", err);
-          controller.error(err);
+        stream.on("end", () => {
+          if (!closed) {
+            closed = true;
+            controller.close();
+          }
         });
+
+        stream.on("error", (err: any) => {
+          if (!closed) {
+            closed = true;
+            controller.error(err);
+          }
+        });
+      },
+      cancel() {
+        stream.destroy();
       },
     });
 
